@@ -1,12 +1,11 @@
 import os, msvcrt, re
-from pytubefix import YouTube, innertube
+from pytubefix import YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
 
 innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "ytDownloadCache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
 
 download_directory = ''
-probl = 'Something went wrong'
 
 def cls():
     return os.system('cls')
@@ -16,6 +15,55 @@ def cls():
 # ys = yt.streams.get_highest_resolution()
 # ys.download()
 
+def tryagain(function, argument):
+    while True:
+            cls()
+            print('Something went wrong')
+            menu = input('Would you like to try again?(Y/n):')
+            if menu == 'Y' or menu == 'y':
+                function(argument)
+                break
+            elif menu == 'N' or menu == 'n':
+                break
+            else:
+                continue
+
+def download(va, yt):
+    if va == 'video':
+        print('Started downloading "%s"' % yt.title)
+        try:
+            yt.streams.get_highest_resolution().download(output_path=download_directory)
+        except AgeRestrictedError:
+            print('Video "%s" is age restricted' % yt.title)
+        except VideoUnavailable:
+            print('Video "%s" is not available' % yt.title)
+    elif va == 'audio':
+        print('Started downloading "%s" audio only' % yt.title)
+        # title = re.sub(r'[\\/:*?"<>|]', '', yt.title)
+        title = helpers.safe_filename(yt.title)
+        try:
+            yt.streams.get_audio_only().download(output_path=download_directory, filename=title+' audio.m4a')
+        except AgeRestrictedError:
+            print(AgeRestrictedError)
+        except VideoUnavailable:
+            print(VideoUnavailable)
+
+
+def ytDownload(va):
+    cls()
+    try:
+        url = input('Please insert the url:')
+    except:
+        tryagain(ytDownload, va)
+    else:
+        try:
+            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+        except:
+            tryagain(ytDownload, va)
+        else:
+            download(va, yt)
+            print('Download finished', end='')
+            input()
 
 
 def youtubeMenu(arg):
@@ -32,13 +80,13 @@ def youtubeMenu(arg):
             if arg == 1:
                 ytDownload('video')
             elif arg == 2:
-                pldownload('video')
+                playlistDownload('video')
             break
         elif menu == 2:
             if arg == 1:
                 ytDownload('audio')
             elif arg == 2:
-                pldownload('audio')
+                playlistDownload('audio')
             break
         elif menu == 3:
             break
