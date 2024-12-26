@@ -1,6 +1,7 @@
 import os, msvcrt, re
-from pytubefix import YouTube, helpers, innertube
+from pytubefix import Playlist, YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
+from pytubefix.cli import on_progress
 
 innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "ytDownloadCache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
@@ -9,11 +10,7 @@ download_directory = ''
 
 def cls():
     return os.system('cls')
-# url1 = "https://www.youtube.com/watch?v=qnC82S70H6I"
 
-# yt = YouTube(url1, use_oauth=True, allow_oauth_cache=True)
-# ys = yt.streams.get_highest_resolution()
-# ys.download()
 
 def tryagain(function, argument):
     while True:
@@ -64,6 +61,36 @@ def ytDownload(va):
             download(va, yt)
             print('Download finished', end='')
             input()
+
+
+def playlistDownload(va):
+    cls()
+    try:
+        url = input('Please insert the url:')
+    except:
+        tryagain(playlistDownload, va)
+    else:
+        check = re.search('list=', url)
+        if check:
+            try:
+                pl = Playlist(url)
+            except:
+                tryagain(playlistDownload, va)
+            else:
+                try:
+                    for vid_url in pl.video_urls:
+                        try:
+                            yt = YouTube(vid_url, use_oauth=True, allow_oauth_cache=True)
+                        except:
+                            print('Something went wrong')
+                        else:
+                            download(va, yt)
+                    print('Download finished', end='')
+                    input()
+                except:
+                    tryagain(playlistDownload, va)
+        else:
+            tryagain(playlistDownload, va)
 
 
 def youtubeMenu(arg):
