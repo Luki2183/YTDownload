@@ -1,12 +1,21 @@
 import os, msvcrt, re
 from pytubefix import Playlist, YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
-from pytubefix.cli import on_progress
 
-innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "ytDownloadCache")
+innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "YTDownloadCache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
 
-download_directory = ''
+settingsdirectory = os.path.join(innertube._cache_dir, 'settings.txt')
+
+
+if os.path.isfile(settingsdirectory):
+    directory = open(settingsdirectory, "r")
+    download_directory = directory.read()
+else:
+    directory = open(settingsdirectory, "x")
+    download_directory = ''
+directory.close()
+
 
 def cls():
     return os.system('cls')
@@ -125,10 +134,16 @@ def dir():
     while True:
         cls()
         dir = input('Please input download directory(press enter to reset dir):')
-        if dir != '':
+        if dir != '' and os.path.isdir(dir):
+            directory = open(settingsdirectory, "w")
+            directory.write(dir)
+            directory.close()
             globals()['download_directory'] = dir
             break
         else:
+            directory = open(settingsdirectory, "w")
+            directory.write('')
+            directory.close()
             globals()['download_directory'] = ''
             break
 
