@@ -1,4 +1,5 @@
-import os, msvcrt, re, ctypes, pygetwindow, tkinter
+import os, msvcrt, re, ctypes, pygetwindow
+from tkinter.filedialog import askdirectory
 from pytubefix import Playlist, YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
 # Font and size stuff
@@ -170,7 +171,8 @@ def youtubeMenu(arg):
 def dir():
     while True:
         cls()
-        dir = input('Please input download directory(press enter to reset dir):')
+        print('Please select new download directory(close window to reset dir):')
+        dir = askdirectory(title='Select Folder')
         if dir != '' and os.path.isdir(dir):
             directory = open(settingsdirectory, "w")
             directory.write(dir)
