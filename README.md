@@ -3,4 +3,4 @@
 
  There is also an option to download whole playlists 😮
  
- Here is the [exe](https://downgit.github.io/#/home?url=https://github.com/Luki2183/YTDownload/blob/main/dist/ytdownload.exe) 😊
+ Here is the [exe](https://github.com/Luki2183/YTDownload/raw/refs/heads/main/dist/ytdownload.exe) 😊
