@@ -5,6 +5,9 @@ from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
 innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "YTDownloadCache")
 innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
 
+if not os.path.exists(innertube._cache_dir):
+    os.makedirs(innertube._cache_dir)
+
 settingsdirectory = os.path.join(innertube._cache_dir, 'settings.txt')
 
 
