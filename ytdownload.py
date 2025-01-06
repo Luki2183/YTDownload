@@ -1,5 +1,6 @@
 import os, msvcrt, re, ctypes, pygetwindow
 from tkinter.filedialog import askdirectory
+from pytubefix.cli import on_progress
 from pytubefix import Playlist, YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
 # Font and size stuff
@@ -77,6 +78,7 @@ def download(va, yt):
         print('Started downloading "%s"' % yt.title)
         try:
             yt.streams.get_highest_resolution().download(output_path=download_directory)
+            print()
         except AgeRestrictedError:
             print('Video "%s" is age restricted' % yt.title)
         except VideoUnavailable:
@@ -87,6 +89,7 @@ def download(va, yt):
         title = helpers.safe_filename(yt.title)
         try:
             yt.streams.get_audio_only().download(output_path=download_directory, filename=title+' audio.m4a')
+            print()
         except AgeRestrictedError:
             print(AgeRestrictedError)
         except VideoUnavailable:
@@ -101,7 +104,7 @@ def ytDownload(va):
         tryagain(ytDownload, va)
     else:
         try:
-            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
         except:
             tryagain(ytDownload, va)
         else:
