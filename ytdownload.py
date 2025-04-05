@@ -1,5 +1,6 @@
 import os, msvcrt, re, ctypes, pygetwindow
 from tkinter.filedialog import askdirectory
+from pytubefix.cli import on_progress
 from pytubefix import Playlist, YouTube, helpers, innertube
 from pytubefix.exceptions import VideoUnavailable, AgeRestrictedError
 # Font and size stuff
@@ -36,14 +37,17 @@ window.size = (1280, 360)
 
 
 # Managing dir's
-innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "YTDownloadCache")
-innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
+# Old workaround for changing cache directory
+# innertube._cache_dir = os.path.join(os.getenv('APPDATA'), "YTDownloadCache")
+# innertube._token_file = os.path.join(innertube._cache_dir, 'tokens.json')
 
-if not os.path.exists(innertube._cache_dir):
-    os.makedirs(innertube._cache_dir)
+cache_dir = os.path.join(os.getenv('APPDATA'), "YTDownloadCache")
+token_directory = os.path.join(cache_dir, 'tokens.json')
 
-settingsdirectory = os.path.join(innertube._cache_dir, 'settings.txt')
+if not os.path.exists(cache_dir):
+    os.makedirs(cache_dir)
 
+settingsdirectory = os.path.join(cache_dir, 'settings.txt')
 
 if os.path.isfile(settingsdirectory):
     directory = open(settingsdirectory, "r")
@@ -52,6 +56,21 @@ else:
     directory = open(settingsdirectory, "x")
     download_directory = ''
 directory.close()
+
+# Update token to work with new YT API HTTP requests
+# Only updates whether user has old token file which does not contain visitorData and po_token fields
+if os.path.isfile(token_directory):
+    token_file = open(token_directory)
+    token_string = token_file.readline()
+    if 'visitorData' not in token_string:
+        token_file = open(token_directory, '+w')
+        token_string = token_string[:-1] + ', "visitorData": null' + token_string[-1:]
+        token_file.write(token_string)
+    if 'po_token' not in token_string:
+        token_file = open(token_directory, '+w')
+        token_string = token_string[:-1] + ', "po_token": null' + token_string[-1:]
+        token_file.write(token_string)
+    token_file.close()
 # ---
 
 
@@ -101,12 +120,12 @@ def ytDownload(va):
         tryagain(ytDownload, va)
     else:
         try:
-            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress, token_file=token_directory)
         except:
             tryagain(ytDownload, va)
         else:
             download(va, yt)
-            print('Download finished', end='')
+            print('\nDownload finished', end='')
             input()
 
 
@@ -125,12 +144,14 @@ def playlistDownload(va):
                 tryagain(playlistDownload, va)
             else:
                 try:
-                    for vid_url in pl.video_urls:
+                    length_of_playlist = len(pl.video_urls)
+                    for indeks, vid_url in enumerate(pl.video_urls):
                         try:
-                            yt = YouTube(vid_url, use_oauth=True, allow_oauth_cache=True)
+                            yt = YouTube(vid_url, use_oauth=True, allow_oauth_cache=True, token_file=token_directory)
                         except:
                             print('Something went wrong')
                         else:
+                            print(f'[{indeks+1}/{length_of_playlist}] ', end='')
                             download(va, yt)
                     print('Download finished', end='')
                     input()
