@@ -96,7 +96,6 @@ def download(va, yt):
         print('Started downloading "%s"' % yt.title)
         try:
             yt.streams.get_highest_resolution().download(output_path=download_directory)
-            print()
         except AgeRestrictedError:
             print('Video "%s" is age restricted' % yt.title)
         except VideoUnavailable:
@@ -107,7 +106,6 @@ def download(va, yt):
         title = helpers.safe_filename(yt.title)
         try:
             yt.streams.get_audio_only().download(output_path=download_directory, filename=title+' audio.m4a')
-            print()
         except AgeRestrictedError:
             print(AgeRestrictedError)
         except VideoUnavailable:
@@ -127,7 +125,7 @@ def ytDownload(va):
             tryagain(ytDownload, va)
         else:
             download(va, yt)
-            print('Download finished', end='')
+            print('\nDownload finished', end='')
             input()
 
 
@@ -146,12 +144,14 @@ def playlistDownload(va):
                 tryagain(playlistDownload, va)
             else:
                 try:
-                    for vid_url in pl.video_urls:
+                    length_of_playlist = len(pl.video_urls)
+                    for indeks, vid_url in enumerate(pl.video_urls):
                         try:
                             yt = YouTube(vid_url, use_oauth=True, allow_oauth_cache=True, token_file=token_directory)
                         except:
                             print('Something went wrong')
                         else:
+                            print(f'[{indeks+1}/{length_of_playlist}] ', end='')
                             download(va, yt)
                     print('Download finished', end='')
                     input()
